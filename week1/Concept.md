@@ -8,9 +8,38 @@
 
 자바스크립트의 타입은 크게 3가지로 나뉜다.
 
-1. Primitive Type
+1. [Primitive Type](https://developer.mozilla.org/ko/docs/Glossary/Primitive)
+
+> 객체가 아니며 메소드를 가지지 않는 타입이다.  
+> 불변성을 가진다.
+
+- number
+- string
+- bigint
+- boolean
+- null
+- undefined
+- symbol
+
 2. Object
+
+> Object란 여러 값을 하나의 변수에 담을 수 있는 타입이다.
+
+```js
+const obj = {
+  name: "홍길동",
+  age: 20,
+};
+```
+
 3. Array
+
+> js의 Array는 사실 Object이다.  
+> Array는 Object의 한 종류로, 숫자를 키로 사용하는 Object이다.
+
+```js
+const arr = [1, 2, 3];
+```
 
 ## - js 변수, 상수 선언 방법 (var, let, const)
 
