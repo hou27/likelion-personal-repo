@@ -34,21 +34,35 @@ let id = 0;
  * @param {{ id: number, title: string, text: string } | null} value
  * */
 const todoControl = (command, value) => {
-  // 대충 뭘 작성함
+  if (command === "create") {
+    createTodo(value);
+  } else if (command === "read") {
+    readTodo();
+  } else if (command === "update") {
+    updateTodo(value);
+  } else if (command === "delete") {
+    deleteTodo(value);
+  } else {
+    console.log("command error!");
+  }
 };
 
 // 보너스: newTodo를 비구조화 할당하여 todos에 추가하세요.
 /** @param {{ id: number, title: string, text: string }} newTodo */
 const createTodo = (newTodo) => {
   // todos에 새로운 todo를 삽입
-  // ㅇㅇㅇ
+  const { id, title, text } = newTodo;
+  todos.push({ id, title, text });
 };
 
 // 출력 형식: 'id: 0, ttile: 타이틀, text: 텍스트'
 // 보너스: 리터럴 문자를 활용해 출력하세요.
 const readTodo = () => {
   // todos를 하나씩 출력 형식에 맞춰 출력
-  // ㅇㅇㅇ
+  todos.forEach((todo) => {
+    const { id, title, text } = todo;
+    console.log(`id: ${id}, title: ${title}, text: ${text}`);
+  });
 };
 
 // 에러처리: 만약 업데이트하려는 todo를 찾을 수 없는 경우 'id = (n)에 맞는 todo를 찾을 수 없습니다.' 를 출력하세요.
@@ -59,7 +73,12 @@ const updateTodo = (targetTodo) => {
   //   return 에러 메시지를 출력하세요
   // }
   // 여기에 업데이트 로직을 작성하세요
-  // ㅇㅇㅇ
+  const index = todos.findIndex((todo) => todo.id === targetTodo.id);
+  index === -1
+    ? console.log(`id = ${targetTodo.id}에 맞는 todo를 찾을 수 없습니다.`)
+    : (todos[index] = targetTodo);
+  // index === -1 && console.log(`id = ${targetTodo.id}에 맞는 todo를 찾을 수 없습니다.`);
+  // index !== -1 && (todos[index] = targetTodo);
 };
 
 // 에러처리: 만약 업데이트하려는 todo를 찾을 수 없는 경우 'id = n에 맞는 todo를 찾을 수 없습니다.' 를 출력하세요.
@@ -71,6 +90,10 @@ const deleteTodo = (id) => {
   // }
   // 여기에 삭제 로직을 작성하세요
   //ㅇㅇㅇ
+  if (!todos.find((todo) => todo.id === id)) {
+    return console.log(`id = ${id}에 맞는 todo를 찾을 수 없습니다.`);
+  }
+  todos = todos.filter((todo) => todo.id !== id);
 };
 
 /*
