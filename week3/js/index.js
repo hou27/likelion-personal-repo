@@ -77,6 +77,12 @@ const deleteTodo = (id) => {
   readTodo();
 };
 
+const logout = () => {
+  alert("로그아웃!");
+  localStorage.removeItem("login");
+  location.href = "./signin.html";
+};
+
 const init = () => {
   checkLogin();
 
@@ -87,6 +93,7 @@ const init = () => {
   readTodo();
 
   todoButtonEl.addEventListener("click", createTodo);
+  logoutButtonEl.addEventListener("click", logout);
 };
 
 document.addEventListener("DOMContentLoaded", init);
