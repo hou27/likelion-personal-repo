@@ -63,6 +63,13 @@ const readTodo = () => {
   });
 };
 
+const updateComplete = (id, isCompleted) => {
+  const todos = JSON.parse(localStorage.getItem("todos"));
+  const index = todos.findIndex((todo) => todo.id === id);
+  todos[index].complete = isCompleted;
+  localStorage.setItem("todos", JSON.stringify(todos));
+};
+
 const init = () => {
   checkLogin();
 
