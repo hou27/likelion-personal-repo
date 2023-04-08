@@ -70,6 +70,13 @@ const updateComplete = (id, isCompleted) => {
   localStorage.setItem("todos", JSON.stringify(todos));
 };
 
+const deleteTodo = (id) => {
+  const todos = JSON.parse(localStorage.getItem("todos"));
+  const result = todos.filter((todo) => todo.id !== id);
+  localStorage.setItem("todos", JSON.stringify(result));
+  readTodo();
+};
+
 const init = () => {
   checkLogin();
 
