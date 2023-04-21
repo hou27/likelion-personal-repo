@@ -131,7 +131,6 @@ const page2 = async () => {
       console.log("로그아웃");
       break;
     default:
-      console.log("잘못된 입력입니다.");
   }
 };
 
