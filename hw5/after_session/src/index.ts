@@ -105,7 +105,7 @@ const page1 = async () => {
       console.log("Saving session...completed.");
       process.exit(0);
     default:
-      console.log("Invalid option");
+      console.log("잘못된 입력입니다.");
   }
 };
 
@@ -131,7 +131,7 @@ const page2 = async () => {
       console.log("로그아웃");
       break;
     default:
-      console.log("Invalid option");
+      console.log("잘못된 입력입니다.");
   }
 };
 
