@@ -43,7 +43,7 @@ const signUp = (signUpInput: SignUpInput): void => {
 const signIn = (signInInput: SignIninput) => {
   const user = users.find((user) => user.email === signInInput.email);
   if (!user || user.password !== signInInput.password) {
-    console.log("로그인 실패!");
+    console.log("해당 이메일을 가진 유저가 없다능");
     return;
   }
 
