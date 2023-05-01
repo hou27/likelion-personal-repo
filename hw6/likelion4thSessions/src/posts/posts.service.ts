@@ -1,58 +1,87 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
-import * as uuid from 'uuid';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class PostsService {
   private posts: Post[] = [];
+  constructor(private readonly usersService: UsersService) {}
 
-  create(createPostDto: CreatePostDto) {
-    const { userId, title, content } = createPostDto;
+  create(userId: string, content: string): Post {
+    const validUserId = this.getValidUserId(userId);
+
     const newPost = {
-      postId: uuid.v1(),
-      userId,
-      title,
+      id: this.generateNewId(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       content,
+      writerId: validUserId,
     };
     this.posts.push(newPost);
+
+    return newPost;
   }
 
-  findAll(id: string) {
-    return this.posts.filter((post) => post.userId === id);
+  findAll(): Post[] {
+    return this.posts;
   }
 
   findOne(postId: string) {
-    const post = this.posts.filter((post) => post.postId === postId);
+    const post = this.posts.find((post) => post.id === postId);
     if (!post) {
       throw new NotFoundException('Post Not Exist');
     }
-    console.log(post);
+
     return post;
   }
 
-  update(postId: string, updatePostDto: UpdatePostDto) {
-    const { title, content, userId } = updatePostDto;
-    const post = this.posts.find(
-      (post) => post.postId === postId && post.userId === userId,
-    );
-    if (!post) {
-      throw new BadRequestException('Post Not Exist');
-    }
-    this.posts = this.posts.filter((post) => post.postId !== postId);
-    console.log(this.posts);
-    post.title = title;
-    post.content = content;
-    this.posts.push(post);
-    console.log('게시글 수정 완료');
+  update(userId: string, postId: string, content: string) {
+    const validUserId = this.getValidUserId(userId);
+
+    const postIndex = this.getValidPostIndex(validUserId, postId);
+    this.posts[postIndex].content = content;
+    this.posts[postIndex].updatedAt = new Date();
+
+    return this.posts[postIndex];
   }
 
-  remove(id: string) {
-    this.posts = this.posts.filter((post) => post.postId !== id);
+  remove(userId: string, postId: string) {
+    const validUserId = this.getValidUserId(userId);
+    const postIndex = this.getValidPostIndex(validUserId, postId);
+
+    this.posts.splice(postIndex, 1);
+  }
+
+  /**
+   * util functions
+   */
+
+  getValidUserId(userId: string): string {
+    if (!userId) {
+      throw new UnauthorizedException('Login Needed');
+    }
+    return this.usersService.findOne(userId).userId;
+  }
+
+  getValidPostIndex(userId: string, postId: string): number {
+    const postIndex = this.posts.findIndex((post) => post.id === postId);
+    if (postIndex === -1) {
+      throw new NotFoundException('Post Not Exist');
+    }
+    if (this.posts[postIndex].writerId !== userId) {
+      throw new UnauthorizedException('Not Your Post');
+    }
+
+    return postIndex;
+  }
+
+  generateNewId(): string {
+    return (
+      this.posts.length > 0 ? +this.posts[this.posts.length - 1].id + 1 : 1
+    ).toString();
   }
 }

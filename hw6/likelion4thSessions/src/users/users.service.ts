@@ -6,24 +6,20 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './users.models';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
   private users: User[] = [];
 
-  create(createUserDto: CreateUserDto) {
-    const { userId, userPw, userName } = createUserDto;
-    if (this.users.find((user) => user.userId === userId)) {
+  create(createUserDto: CreateUserDto): User {
+    if (this.users.find((user) => user.userId === createUserDto.userId)) {
       throw new ConflictException('User Already Exist');
     }
-    const user: User = {
-      userId,
-      userPw,
-      userName,
-    };
-
+    const user: User = createUserDto;
     this.users.push(user);
+
+    return user;
   }
 
   findAll() {

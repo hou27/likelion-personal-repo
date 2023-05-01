@@ -6,10 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  Headers,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
 
 /**
  * crud
@@ -20,13 +19,13 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
+  create(@Headers('userId') userId: string, @Body('content') content: string) {
+    return this.postsService.create(userId, content);
   }
 
-  @Get('all/:id')
-  findAll(@Param('id') id: string) {
-    return this.postsService.findAll(id);
+  @Get()
+  findAll() {
+    return this.postsService.findAll();
   }
 
   @Get(':id')
@@ -35,12 +34,16 @@ export class PostsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(id, updatePostDto);
+  update(
+    @Headers('userId') userId: string,
+    @Param('id') postId: string,
+    @Body('content') content: string,
+  ) {
+    return this.postsService.update(userId, postId, content);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(id);
+  remove(@Headers('userId') userId: string, @Param('id') postId: string) {
+    return this.postsService.remove(userId, postId);
   }
 }

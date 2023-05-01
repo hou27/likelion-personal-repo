@@ -1,6 +1,7 @@
 export class Post {
-  postId: string;
-  title: string;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
   content: string;
-  userId: string;
+  writerId: string;
 }
