@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -26,8 +25,8 @@ export class UsersService {
     return this.users;
   }
 
-  findOne(userId: string) {
-    const user = this.users.find((user) => user.userId === userId);
+  findOne(id: string) {
+    const user = this.users.find((user) => user.userId === id);
     if (!user) {
       throw new NotFoundException('User Not Exist');
     }
@@ -36,20 +35,29 @@ export class UsersService {
 
   update(id: string, updateUserDto: UpdateUserDto) {
     const { userId, userName } = updateUserDto;
-    const user = this.users.find((user) => user.userId === id);
-    if (!user) {
-      throw new BadRequestException('User Not Exist');
-    }
-    // 해당 유저 정보 제거 후 새로운 정보로 추가
-    this.users = this.users.filter((user) => user.userId !== id);
-    console.log(this.users);
-    user.userId = userId;
-    user.userName = userName;
-    this.users.push(user);
-    console.log('유저 수정 완료');
+    const userIndex = this.getValidUserIndex(id);
+
+    this.users[userIndex].userId = userId;
+    this.users[userIndex].userName = userName;
+
+    return this.users[userIndex];
   }
 
-  remove(userId: string) {
-    return `This action removes a #${userId} user`;
+  remove(id: string) {
+    const userIndex = this.getValidUserIndex(id);
+
+    this.users.splice(userIndex, 1);
+  }
+
+  /**
+   * util functions
+   */
+
+  getValidUserIndex(id: string): number {
+    const userIndex = this.users.findIndex((user) => user.userId === id);
+    if (userIndex === -1) {
+      throw new NotFoundException('User Not Exist');
+    }
+    return userIndex;
   }
 }
