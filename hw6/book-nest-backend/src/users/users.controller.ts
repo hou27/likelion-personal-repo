@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  HttpStatus,
+  Inject,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  ValidationPipe,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserInfo } from './UserInfo';
@@ -14,7 +26,7 @@ export class UsersController {
   ) {}
 
   @Post()
-  createUser(@Body() dto: CreateUserDto): void {
+  createUser(@Body(/**ValidationPipe**/) dto: CreateUserDto): void {
     const { name, email, password } = dto;
     this.usersService.createUser(name, email, password);
   }
@@ -34,12 +46,27 @@ export class UsersController {
   }
 
   @Get('/:id')
-  getUserInfo(@Param('id') userId: string): UserInfo {
+  getUserInfo(
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    userId: string,
+  ): UserInfo {
     return this.usersService.getUserInfo(userId);
   }
 
   @Get()
-  envtest(): string {
-    return this.config.auth.env + ' and ' + this.config.db.env;
+  findAll(
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    // return this.usersService.findAll();
+    return `offset: ${offset}, limit: ${limit}`;
   }
+
+  // @Get()
+  // envtest(): string {
+  //   return this.config.auth.env + ' and ' + this.config.db.env;
+  // }
 }
