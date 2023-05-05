@@ -1,12 +1,17 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserInfo } from './UserInfo';
 import { UsersService } from './users.service';
+import { ConfigService, ConfigType } from '@nestjs/config';
+import envconfig from 'src/config/envconfig';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    @Inject(envconfig.KEY) private config: ConfigType<typeof envconfig>,
+  ) {}
 
   @Post()
   createUser(@Body() dto: CreateUserDto): void {
@@ -31,5 +36,10 @@ export class UsersController {
   @Get('/:id')
   getUserInfo(@Param('id') userId: string): UserInfo {
     return this.usersService.getUserInfo(userId);
+  }
+
+  @Get()
+  envtest(): string {
+    return this.config.auth.env + ' and ' + this.config.db.env;
   }
 }
