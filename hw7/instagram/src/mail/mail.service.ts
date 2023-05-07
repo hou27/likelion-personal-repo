@@ -41,8 +41,8 @@ export class MailService {
     }
   }
 
-  sendVerificationEmail(email: string, name: string, code: string) {
-    this.sendEmail(
+  async sendVerificationEmail(email: string, name: string, code: string) {
+    await this.sendEmail(
       email,
       'Verify Your Email',
       this.config.MAILGUN_TEMPLATE_NAME_FOR_VERIFY_EMAIL,
