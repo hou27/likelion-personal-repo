@@ -6,6 +6,8 @@ import { PostsModule } from './posts/posts.module';
 import { MailModule } from './mail/mail.module';
 import emailConfig from './config/emailConfig';
 import { validationSchema } from './config/validationSchema';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './common/http-exception.filter';
 
 @Module({
   imports: [
@@ -26,6 +28,11 @@ import { validationSchema } from './config/validationSchema';
     MailModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}
