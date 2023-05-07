@@ -57,4 +57,15 @@ export class PostsService {
 
     return post.likes;
   }
+
+  addLikes(postId: number): number {
+    const post = this.postsRepository.findOneById(postId);
+    if (!post) {
+      throw new NotFoundException('Post Not Exist');
+    }
+
+    post.likes += 1;
+
+    return post.likes;
+  }
 }

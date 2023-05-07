@@ -5,6 +5,7 @@ import {
   Headers,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -32,5 +33,10 @@ export class PostsController {
   @Get(':id/likes')
   loadLikes(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.loadLikes(id);
+  }
+
+  @Patch(':id/like')
+  addLikes(@Param('id', ParseIntPipe) id: number) {
+    return this.postsService.addLikes(id);
   }
 }
