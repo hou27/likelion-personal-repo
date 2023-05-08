@@ -3,18 +3,7 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersRepository {
-  private users: User[] = [
-    {
-      id: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      name: 'Alice',
-      email: 'ataj125@gmail.com',
-      password: 'pw',
-      birth: new Date(),
-      verified: true,
-    },
-  ];
+  private users: User[] = [];
 
   private findOneBy(prop: string, value: string | number): User {
     const user = this.users.find((user) => user[prop] === value);
