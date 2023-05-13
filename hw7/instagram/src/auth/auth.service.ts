@@ -12,7 +12,7 @@ import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  private codes: { [key: string]: number } = {};
+  private codes: { [key: string]: number } = {}; // redis 대체용 verification code 저장소
   constructor(
     private readonly userRepository: UsersRepository,
     private readonly mailService: MailService,
