@@ -1,42 +1,63 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { UserInfo } from './UserInfo';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import * as uuid from 'uuid';
 
 @Injectable()
 export class UsersService {
   private readonly users: (UserInfo & { password: string })[];
-  constructor() {
+  constructor(
+    // MySQL DB
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {
     // memory DB
     this.users = [];
   }
 
-  createUser(name: string, email: string, password: string) {
-    this.checkUserExists(email);
+  async createUser(name: string, email: string, password: string) {
+    if (await this.checkUserExists(email)) {
+      throw new UnprocessableEntityException('이미 존재하는 이메일입니다.');
+    }
 
-    // const signupVerifyToken = uuid.v1();
+    const signupVerifyToken = uuid.v1();
 
-    this.saveUser(name, email, password /*signupVerifyToken*/);
+    this.saveUser(name, email, password, signupVerifyToken);
     // await this.sendMemberJoinEmail(email, signupVerifyToken);
   }
 
-  private checkUserExists(email: string): boolean {
-    return this.users.some((user) => user.email === email);
+  private async checkUserExists(email: string): Promise<boolean> {
+    // return this.users.some((user) => user.email === email);
+    const user = await this.userRepository.findOneBy({ email });
+
+    return !!user;
   }
 
-  private saveUser(
+  private async saveUser(
     name: string,
     email: string,
     password: string,
-    // signupVerifyToken: string,
+    signupVerifyToken: string,
   ) {
-    this.users.push({
-      id: (this.users.length > 0
-        ? +this.users[this.users.length - 1].id + 1
-        : 1
-      ).toString(),
-      name,
-      email,
-      password,
-    });
+    // this.users.push({
+    //   id: (this.users.length > 0
+    //     ? +this.users[this.users.length - 1].id + 1
+    //     : 1
+    //   ).toString(),
+    //   name,
+    //   email,
+    //   password,
+    // });
+    await this.userRepository.save(
+      this.userRepository.create({
+        name,
+        email,
+        password,
+        signupVerifyToken,
+      }),
+    );
   }
 
   // private async sendMemberJoinEmail(email: string, signupVerifyToken: string) {
