@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Headers,
   Param,
@@ -10,10 +11,14 @@ import {
   Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
+import { CommentsService } from './comments.service';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly commentsService: CommentsService,
+  ) {}
 
   @Post()
   async create(
@@ -31,6 +36,29 @@ export class PostsController {
   @Get(':id')
   async postDetail(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.postDetail(id);
+  }
+
+  @Post(':id/comment')
+  async addComment(
+    @Param('id', ParseIntPipe) id: number,
+    @Headers('userId') userId: string,
+    @Body('content') content: string,
+  ) {
+    return this.commentsService.addComment(id, +userId, content);
+  }
+
+  @Get(':id/comments')
+  async loadComments(@Param('id', ParseIntPipe) id: number) {
+    return this.commentsService.loadComments(id);
+  }
+
+  @Delete(':id/comment/:commentId')
+  async deleteComment(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
+    @Headers('userId') userId: string,
+  ) {
+    return this.commentsService.deleteComment(id, commentId, +userId);
   }
 
   @Get(':id/likes')
