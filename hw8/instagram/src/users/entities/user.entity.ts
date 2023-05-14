@@ -1,5 +1,6 @@
 import { IsBoolean, IsDate, IsEmail, IsString, Matches } from 'class-validator';
 import { CoreEntity } from 'src/common/entities/core.entity';
+import { Comment } from 'src/posts/entities/comment.entity';
 import { Post } from 'src/posts/entities/post.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 
@@ -30,4 +31,7 @@ export class User extends CoreEntity {
 
   @OneToMany(() => Post, (post) => post.writer, { nullable: true })
   posts?: Post[];
+
+  @OneToMany(() => Comment, (comment) => comment.writer, { nullable: true })
+  comments?: Comment[];
 }
