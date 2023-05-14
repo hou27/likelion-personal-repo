@@ -48,15 +48,17 @@ export class CommentsService {
     );
   }
 
-  async loadComments(userId: number): Promise<Comment[]> {
-    const user = await this.usersRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new NotFoundException('User Not Exist');
+  async loadComments(postId: number): Promise<Comment[]> {
+    const post = await this.postsRepository.findOneBy({ id: postId });
+    if (!post) {
+      throw new NotFoundException('Post Not Exist');
     }
 
-    return await this.commentsRepository.find({
-      where: { writer: user },
+    const comments = await this.commentsRepository.find({
+      where: { post: { id: postId } },
     });
+
+    return comments;
   }
 
   async deleteComment(
@@ -64,12 +66,17 @@ export class CommentsService {
     commentId: number,
     userId: number,
   ): Promise<void> {
+    console.log(postId, commentId, userId);
     const post = await this.postsRepository.findOneBy({ id: postId });
     if (!post) {
       throw new NotFoundException('Post Not Exist');
     }
 
-    const comment = await this.commentsRepository.findOneBy({ id: commentId });
+    console.log(postId, commentId, userId);
+    const comment = await this.commentsRepository.findOne({
+      where: { id: commentId },
+      relations: { writer: true },
+    });
     if (!comment) {
       throw new NotFoundException('Comment Not Exist');
     }
@@ -78,6 +85,11 @@ export class CommentsService {
       throw new ForbiddenException('Not Your Comment');
     }
 
-    await this.commentsRepository.delete({ id: commentId });
+    const deleteResult = await this.commentsRepository.delete({
+      id: commentId,
+    });
+    if (deleteResult.affected === 0) {
+      throw new NotFoundException('Comment Not Exist');
+    }
   }
 }

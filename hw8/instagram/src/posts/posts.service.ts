@@ -35,16 +35,30 @@ export class PostsService {
   }
 
   async loadMyPosts(userId: number): Promise<Post[]> {
-    const user = await this.usersRepository.findOneBy({ id: userId });
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: {
+        posts: {
+          comments: true,
+        },
+      },
+    });
     if (!user) {
       throw new NotFoundException('User Not Exist');
     }
 
-    return await this.postsRepository.findBy({ writer: user });
+    return user.posts;
   }
 
   async postDetail(postId: number): Promise<Post> {
-    const post = await this.postsRepository.findOneBy({ id: postId });
+    const post = await this.postsRepository.findOne({
+      where: { id: postId },
+      relations: {
+        comments: {
+          writer: true,
+        },
+      },
+    });
     if (!post) {
       throw new NotFoundException('Post Not Exist');
     }

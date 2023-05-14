@@ -48,8 +48,8 @@ export class PostsController {
   }
 
   @Get(':id/comments')
-  async loadComments(@Param('id', ParseIntPipe) id: number) {
-    return this.commentsService.loadComments(id);
+  async loadComments(@Param('id', ParseIntPipe) postId: number) {
+    return this.commentsService.loadComments(postId);
   }
 
   @Delete(':id/comment/:commentId')
