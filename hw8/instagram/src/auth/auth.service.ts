@@ -7,12 +7,12 @@ import {
 import { MailService } from 'src/mail/mail.service';
 import { CreateAccountBodyDto } from './dto/create-account.dto';
 import { LoginBodyDto } from './dto/login.dto';
-import { UsersRepository } from 'src/users/users.repository';
 import { User } from 'src/users/entities/user.entity';
+import { UsersRepository } from 'src/users/users.repository';
 
 @Injectable()
 export class AuthService {
-  private codes: { [key: string]: number } = {}; // redis 대체용 verification code 저장소
+  private codes: Record<string, number> = {}; // redis 대체용 verification code 저장소
   constructor(
     private readonly userRepository: UsersRepository,
     private readonly mailService: MailService,
@@ -24,16 +24,14 @@ export class AuthService {
     password,
   }: CreateAccountBodyDto): Promise<void> {
     try {
-      const user = await this.userRepository.findOneByEmail(email);
+      const user = await this.userRepository.findOneBy({ email });
       if (!user) {
         throw new NotFoundException('User Not Exist');
       }
-
       if (user.verified) {
         user.name = name;
         user.password = password;
         await this.userRepository.save(user);
-
         return;
       } else {
         throw new NotFoundException('User is not verified');
@@ -54,7 +52,7 @@ export class AuthService {
   }
 
   async sendVerifyEmail(email: string): Promise<void> {
-    let user = await this.userRepository.findOneByEmail(email);
+    let user = await this.userRepository.findOneBy({ email });
 
     if (user) {
       if (user.verified) {
@@ -67,8 +65,13 @@ export class AuthService {
         }
       }
     } else {
-      user = this.userRepository.save(
-        this.userRepository.create('unverified', email, 'unverified0'),
+      user = await this.userRepository.save(
+        this.userRepository.create({
+          name: 'unverified user',
+          email,
+          password: 'unverified user',
+          birth: new Date(),
+        }),
       );
     }
 
@@ -85,7 +88,7 @@ export class AuthService {
     const userId = this.codes[code];
 
     if (userId) {
-      const user = await this.userRepository.findOneById(userId);
+      const user = await this.userRepository.findOneBy({ id: userId });
       user.verified = true;
       await this.userRepository.save(user); // verify
       delete this.codes[code];
@@ -98,14 +101,15 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User> {
     try {
-      const user = await this.userRepository.findOneByEmail(email);
+      const user = await this.userRepository.findOne({
+        where: { email },
+        select: { id: true, password: true },
+      });
       if (!user) {
         throw new NotFoundException('User Not Found');
       }
 
-      const isPasswordCorrect = password === user.password;
-
-      if (isPasswordCorrect) {
+      if (password === user.password) {
         return user;
       } else {
         throw new BadRequestException('Wrong Password');

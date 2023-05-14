@@ -6,7 +6,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('/check')
-  checkDuplicateUsername(@Query('username') username: string): boolean {
+  async checkDuplicateUsername(
+    @Query('username') username: string,
+  ): Promise<boolean> {
     return this.usersService.checkDuplicateUsername(username);
   }
 }

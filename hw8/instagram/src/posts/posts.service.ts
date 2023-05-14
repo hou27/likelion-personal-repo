@@ -4,44 +4,47 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Post } from './entities/post.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { UsersRepository } from 'src/users/users.repository';
-import { PostsRepository } from './posts.repository';
 
 @Injectable()
 export class PostsService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly postsRepository: PostsRepository,
+    @InjectRepository(Post)
+    private readonly postsRepository: Repository<Post>,
   ) {}
 
-  create(userId: number, content: string): Post {
+  async create(userId: number, content: string): Promise<Post> {
     if (!userId) {
       throw new UnauthorizedException('Login Needed');
     }
 
-    const user = this.usersRepository.findOneById(userId);
+    const user = await this.usersRepository.findOneBy({ id: userId });
     if (!user) {
       throw new NotFoundException('User Not Exist');
     }
 
-    const newPost = this.postsRepository.save(
-      this.postsRepository.create(user.id, content),
+    return await this.postsRepository.save(
+      this.postsRepository.create({
+        content,
+        writer: user,
+      }),
     );
-
-    return newPost;
   }
 
-  loadMyPosts(userId: number): Post[] {
-    const user = this.usersRepository.findOneById(userId);
+  async loadMyPosts(userId: number): Promise<Post[]> {
+    const user = await this.usersRepository.findOneBy({ id: userId });
     if (!user) {
       throw new NotFoundException('User Not Exist');
     }
 
-    return this.postsRepository.findByUserId(user.id);
+    return await this.postsRepository.findBy({ writer: user });
   }
 
-  postDetail(postId: number): Post {
-    const post = this.postsRepository.findOneById(postId);
+  async postDetail(postId: number): Promise<Post> {
+    const post = await this.postsRepository.findOneBy({ id: postId });
     if (!post) {
       throw new NotFoundException('Post Not Exist');
     }
@@ -49,8 +52,8 @@ export class PostsService {
     return post;
   }
 
-  loadLikes(postId: number): number {
-    const post = this.postsRepository.findOneById(postId);
+  async loadLikes(postId: number): Promise<number> {
+    const post = await this.postsRepository.findOneBy({ id: postId });
     if (!post) {
       throw new NotFoundException('Post Not Exist');
     }
@@ -58,13 +61,13 @@ export class PostsService {
     return post.likes;
   }
 
-  addLikes(postId: number): number {
-    const post = this.postsRepository.findOneById(postId);
+  async addLikes(postId: number): Promise<number> {
+    const post = await this.postsRepository.findOneBy({ id: postId });
     if (!post) {
       throw new NotFoundException('Post Not Exist');
     }
 
-    post.likes += 1;
+    post.likes++;
 
     return post.likes;
   }
