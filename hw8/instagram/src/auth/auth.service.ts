@@ -8,7 +8,7 @@ import { MailService } from 'src/mail/mail.service';
 import { CreateAccountBodyDto } from './dto/create-account.dto';
 import { LoginBodyDto } from './dto/login.dto';
 import { User } from 'src/users/entities/user.entity';
-import { UsersRepository } from 'src/users/users.repository';
+import { UsersRepository } from 'src/users/repository/users.repository';
 
 @Injectable()
 export class AuthService {
