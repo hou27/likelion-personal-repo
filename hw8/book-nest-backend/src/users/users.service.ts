@@ -1,21 +1,23 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { UserInfo } from './UserInfo';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as uuid from 'uuid';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UsersService {
-  private readonly users: (UserInfo & { password: string })[];
   constructor(
     // MySQL DB
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {
-    // memory DB
-    this.users = [];
-  }
+    private readonly usersRepository: Repository<User>,
+    private readonly authService: AuthService,
+  ) {}
 
   async createUser(name: string, email: string, password: string) {
     if (await this.checkUserExists(email)) {
@@ -30,7 +32,7 @@ export class UsersService {
 
   private async checkUserExists(email: string): Promise<boolean> {
     // return this.users.some((user) => user.email === email);
-    const user = await this.userRepository.findOneBy({ email });
+    const user = await this.usersRepository.findOneBy({ email });
 
     return !!user;
   }
@@ -50,8 +52,8 @@ export class UsersService {
     //   email,
     //   password,
     // });
-    await this.userRepository.save(
-      this.userRepository.create({
+    await this.usersRepository.save(
+      this.usersRepository.create({
         name,
         email,
         password,
@@ -60,42 +62,34 @@ export class UsersService {
     );
   }
 
-  // private async sendMemberJoinEmail(email: string, signupVerifyToken: string) {
-  //   await this.emailService.sendMemberJoinVerification(
-  //     email,
-  //     signupVerifyToken,
-  //   );
-  // }
-
-  // async verifyEmail(signupVerifyToken: string): Promise<string> {
-  //   // TODO
-  //   // 1. DB에서 signupVerifyToken으로 회원 가입 처리중인 유저가 있는지 조회하고 없다면 에러 처리
-  //   // 2. 바로 로그인 상태가 되도록 JWT를 발급
-
-  //   throw new Error('Method not implemented.');
-  // }
-
-  login(email: string, password: string): string {
+  async login(email: string, password: string): Promise<string> {
     // 1. email, password를 가진 유저가 존재하는지 DB에서 확인하고 없다면 에러 처리
     // TODO : 2. JWT를 발급
 
-    const userInfo = this.users.find(
-      (user) => user.email === email && user.password === password,
-    );
-    if (!userInfo) {
+    const user = await this.usersRepository.findOne({
+      where: { email, password },
+    });
+    if (!user) {
       throw new Error('User not found');
     }
-    return 'login success';
+    return this.authService.login({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
   }
 
-  getUserInfo(userId: string): UserInfo {
-    // 1. userId를 가진 유저가 존재하는지 DB에서 확인하고 없다면 에러 처리
-    // 2. 조회된 데이터를 UserInfo 타입으로 응답
+  async getUserInfo(userId: string): Promise<UserInfo> {
+    const user = await this.usersRepository.findOneBy({ id: userId });
 
-    const userInfo = this.users.find((user) => user.id === userId);
-    if (!userInfo) {
-      throw new Error('User not found');
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
-    return userInfo;
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    };
   }
 }

@@ -3,27 +3,21 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
-  HttpStatus,
-  Inject,
   Param,
   ParseIntPipe,
   Post,
   Query,
-  ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserInfo } from './UserInfo';
 import { UsersService } from './users.service';
-import { ConfigService, ConfigType } from '@nestjs/config';
-import envconfig from 'src/config/envconfig';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    private usersService: UsersService,
-    @Inject(envconfig.KEY) private config: ConfigType<typeof envconfig>,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   createUser(@Body(/**ValidationPipe**/) dto: CreateUserDto): void {
@@ -39,20 +33,15 @@ export class UsersController {
   // }
 
   @Post('/login')
-  login(@Body() dto: UserLoginDto): string {
+  async login(@Body() dto: UserLoginDto): Promise<string> {
     const { email, password } = dto;
 
     return this.usersService.login(email, password);
   }
 
+  @UseGuards(AuthGuard)
   @Get('/:id')
-  getUserInfo(
-    @Param(
-      'id',
-      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
-    )
-    userId: string,
-  ): UserInfo {
+  async getUserInfo(@Param('id') userId: string): Promise<UserInfo> {
     return this.usersService.getUserInfo(userId);
   }
 

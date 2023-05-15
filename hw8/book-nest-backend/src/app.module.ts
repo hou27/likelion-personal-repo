@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
-import envconfig from './config/envconfig';
+import authConfig from './config/authConfig';
 import { validationSchema } from './config/validationSchema';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './http-exception.filter';
@@ -10,13 +10,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Logger2Middleware } from './logger/logger2.middleware';
 import { LoggerMiddleware } from './logger/logger.middleware';
 import { UsersController } from './users/users.controller';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     UsersModule,
     ConfigModule.forRoot({
       envFilePath: [`.env.${process.env.NODE_ENV}`],
-      load: [envconfig],
+      load: [authConfig],
       isGlobal: true,
       validationSchema,
     }),
@@ -34,6 +35,7 @@ import { UsersController } from './users/users.controller';
       migrations: [__dirname + '/**/migrations/*.js'],
       migrationsTableName: 'migrations',
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
