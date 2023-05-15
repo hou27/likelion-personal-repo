@@ -11,6 +11,8 @@ import { Logger2Middleware } from './logger/logger2.middleware';
 import { LoggerMiddleware } from './logger/logger.middleware';
 import { UsersController } from './users/users.controller';
 import { AuthModule } from './auth/auth.module';
+import { WinstonModule, utilities } from 'nest-winston';
+import * as winston from 'winston';
 
 @Module({
   imports: [
@@ -36,6 +38,17 @@ import { AuthModule } from './auth/auth.module';
       migrationsTableName: 'migrations',
     }),
     AuthModule,
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.Console({
+          level: process.env.NODE_ENV === 'prod' ? 'info' : 'silly',
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            utilities.format.nestLike('MyApp', { prettyPrint: true }),
+          ),
+        }),
+      ],
+    }),
   ],
   controllers: [AppController],
   providers: [

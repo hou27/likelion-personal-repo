@@ -3,6 +3,7 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  Inject,
   Param,
   ParseIntPipe,
   Post,
@@ -14,13 +15,20 @@ import { UserLoginDto } from './dto/user-login.dto';
 import { UserInfo } from './UserInfo';
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger as WinstonLogger } from 'winston';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: WinstonLogger,
+  ) {}
 
   @Post()
   createUser(@Body(/**ValidationPipe**/) dto: CreateUserDto): void {
+    this.printWinstonLog(dto);
     const { name, email, password } = dto;
     this.usersService.createUser(name, email, password);
   }
@@ -35,6 +43,7 @@ export class UsersController {
   @Post('/login')
   async login(@Body() dto: UserLoginDto): Promise<string> {
     const { email, password } = dto;
+    this.printWinstonLog(dto);
 
     return this.usersService.login(email, password);
   }
@@ -54,8 +63,15 @@ export class UsersController {
     return `offset: ${offset}, limit: ${limit}`;
   }
 
-  // @Get()
-  // envtest(): string {
-  //   return this.config.auth.env + ' and ' + this.config.db.env;
-  // }
+  private printWinstonLog(dto) {
+    // console.log(this.logger.name);
+
+    this.logger.error('error: ', dto);
+    this.logger.warn('warn: ', dto);
+    this.logger.info('info: ', dto);
+    this.logger.http('http: ', dto);
+    this.logger.verbose('verbose: ', dto);
+    this.logger.debug('debug: ', dto);
+    this.logger.silly('silly: ', dto);
+  }
 }
