@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { HttpExceptionFilter } from './common/http-exception.filter';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { MailModule } from './mail/mail.module';
 import emailConfig from './config/emailConfig';
 import { validationSchema } from './config/validationSchema';
-import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from './common/http-exception.filter';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [

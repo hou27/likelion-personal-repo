@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { PostsService } from './posts.service';
-import { PostsController } from './posts.controller';
-import { UsersModule } from 'src/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from 'src/users/users.module';
 import { Post } from './entities/post.entity';
-import { CommentsService } from './comments.service';
 import { Comment } from './entities/comment.entity';
+import { PostsController } from './posts.controller';
+import { CommentsService } from './comments.service';
+import { PostsService } from './posts.service';
 
 @Module({
   imports: [UsersModule, TypeOrmModule.forFeature([Post, Comment])],

@@ -12,7 +12,7 @@ import { UsersRepository } from 'src/users/repository/users.repository';
 
 @Injectable()
 export class AuthService {
-  private codes: Record<string, number> = {}; // redis 대체용 verification code 저장소
+  private verificationCodeStore: Record<string, number> = {}; // redis 대체용 verification code 저장소
   constructor(
     private readonly userRepository: UsersRepository,
     private readonly mailService: MailService,
@@ -77,7 +77,7 @@ export class AuthService {
 
     // Email Verification
     const code: string = 'random code';
-    this.codes[code] = user.id;
+    this.verificationCodeStore[code] = user.id;
 
     await this.mailService.sendVerificationEmail(user.email, user.email, code);
 
@@ -85,13 +85,13 @@ export class AuthService {
   }
 
   async verifyEmail(code: string): Promise<void> {
-    const userId = this.codes[code];
+    const userId = this.verificationCodeStore[code];
 
     if (userId) {
       const user = await this.userRepository.findOneBy({ id: userId });
       user.verified = true;
       await this.userRepository.save(user); // verify
-      delete this.codes[code];
+      delete this.verificationCodeStore[code];
 
       return;
     } else {
