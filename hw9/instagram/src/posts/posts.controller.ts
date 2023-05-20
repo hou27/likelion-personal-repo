@@ -9,9 +9,13 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CommentsService } from './comments.service';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('posts')
 export class PostsController {
@@ -20,16 +24,18 @@ export class PostsController {
     private readonly commentsService: CommentsService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
-    @Headers('userId') userId: string,
+    @AuthUser() { id: userId }: User,
     @Body('content') content: string,
   ) {
     return this.postsService.create(+userId, content);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async loadMyPosts(@Query('userId', ParseIntPipe) userId: number) {
+  async loadMyPosts(@AuthUser() { id: userId }: User) {
     return this.postsService.loadMyPosts(userId);
   }
 
@@ -38,10 +44,11 @@ export class PostsController {
     return this.postsService.postDetail(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':id/comment')
   async addComment(
     @Param('id', ParseIntPipe) id: number,
-    @Headers('userId') userId: string,
+    @AuthUser() { id: userId }: User,
     @Body('content') content: string,
   ) {
     return this.commentsService.addComment(id, +userId, content);
@@ -52,11 +59,12 @@ export class PostsController {
     return this.commentsService.loadComments(postId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id/comment/:commentId')
   async deleteComment(
     @Param('id', ParseIntPipe) id: number,
     @Param('commentId', ParseIntPipe) commentId: number,
-    @Headers('userId') userId: string,
+    @AuthUser() { id: userId }: User,
   ) {
     return this.commentsService.deleteComment(id, commentId, +userId);
   }
