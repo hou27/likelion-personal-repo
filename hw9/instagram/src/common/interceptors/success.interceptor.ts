@@ -24,10 +24,18 @@ export class SuccessInterceptor implements NestInterceptor {
         const statusCode: number = context
           .switchToHttp()
           .getResponse().statusCode;
-        return {
-          statusCode,
-          ...returnValue,
-        };
+
+        if (typeof returnValue == 'string') {
+          return {
+            statusCode,
+            message: returnValue,
+          };
+        } else {
+          return {
+            statusCode,
+            ...returnValue,
+          };
+        }
       }),
     );
   }
