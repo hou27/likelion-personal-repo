@@ -1,0 +1,4 @@
+# Ignore ide file
+*.iml
+.idea/
+.vscode/
